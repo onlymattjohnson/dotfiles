@@ -84,3 +84,68 @@ if (Test-Path $packagesConfigPath) {
 #endregion
 
 Write-Host "--- Initial Software Installation Complete ---" -ForegroundColor Green
+
+Write-Host "--- Applying PowerShell Profile Configurations ---" -ForegroundColor Green
+
+#region Set up User Profile specific configurations (e.g., PowerShell Profile)
+$powerShellProfileSource = Join-Path $scriptDir "user-profile\Microsoft.PowerShell_profile.ps1"
+$powerShellProfileTarget = $PROFILE # $PROFILE is a built-in PowerShell variable for the profile path
+
+if (Test-Path $powerShellProfileSource) {
+    Write-Host "Setting up PowerShell profile..." -ForegroundColor Yellow
+    # Ensure the target directory exists
+    $profileDir = Split-Path -Parent $powerShellProfileTarget
+    if (-not (Test-Path $profileDir)) {
+        New-Item -ItemType Directory -Path $profileDir -Force | Out-Null
+    }
+
+    # Copy the profile file. Using Copy-Item is generally simpler and safer than symlinks for profiles.
+    Copy-Item -Path $powerShellProfileSource -Destination $powerShellProfileTarget -Force -Confirm:$false
+    Write-Host "PowerShell profile setup complete. Restart PowerShell to see changes." -ForegroundColor Green
+} else {
+    Write-Warning "PowerShell profile source not found at '$powerShellProfileSource'. Skipping profile setup."
+}
+#endregion
+
+Write-Host "--- Configuring Git Global Settings ---" -ForegroundColor Green
+
+#region Configure Git Global Settings
+try {
+    # Check if user.name is already set globally
+    $currentGitUserName = git config --global user.name -ErrorAction SilentlyContinue # Use -ErrorAction SilentlyContinue to suppress errors if not set
+    if ($null -eq $currentGitUserName -or $currentGitUserName -eq "") {
+        # If not set, prompt the user for their Git user name
+        $gitUserName = Read-Host -Prompt "Enter your Git user name (e.g., 'John Doe')"
+        if ($gitUserName) { # Only set if user provides a value
+            git config --global user.name "$gitUserName"
+            Write-Host "Git global user.name set to '$gitUserName'." -ForegroundColor Green
+        } else {
+            Write-Warning "Git user name not provided. Skipping setting user.name."
+        }
+    } else {
+        Write-Host "Git global user.name is already set to '$currentGitUserName'." -ForegroundColor Cyan
+    }
+
+    # Check if user.email is already set globally
+    $currentGitUserEmail = git config --global user.email -ErrorAction SilentlyContinue # Use -ErrorAction SilentlyContinue
+    if ($null -eq $currentGitUserEmail -or $currentGitUserEmail -eq "") {
+        # If not set, prompt the user for their Git user email
+        $gitUserEmail = Read-Host -Prompt "Enter your Git user email (e.g., 'your.email@example.com')"
+        if ($gitUserEmail) { # Only set if user provides a value
+            git config --global user.email "$gitUserEmail"
+            Write-Host "Git global user.email set to '$gitUserEmail'." -ForegroundColor Green
+        } else {
+            Write-Warning "Git user email not provided. Skipping setting user.email."
+        }
+    } else {
+        Write-Host "Git global user.email is already set to '$currentGitUserEmail'." -ForegroundColor Cyan
+    }
+
+    Write-Host "Git global settings configuration complete." -ForegroundColor Green
+}
+catch {
+    Write-Error "Failed to configure Git global settings: $($_.Exception.Message)"
+}
+#endregion
+
+Write-Host "--- Windows Dotfiles Setup Complete! ---" -ForegroundColor Green
