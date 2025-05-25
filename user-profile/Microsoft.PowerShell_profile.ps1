@@ -41,7 +41,7 @@ if (Get-Command oh-my-posh -ErrorAction SilentlyContinue) {
     # Set a theme for Oh My Posh. You can choose from many built-in themes.
     # Find themes in C:\Program Files\OhMyPosh\themes\
     # Or https://ohmyposh.dev/docs/themes'
-    oh-my-posh init pwsh --config "$env:POSH_THEMES_PATH\jandedev.omp.json" | Invoke-Expression
+    oh-my-posh init pwsh --config "$env:POSH_THEMES_PATH\jandedobbeleer.omp.json" | Invoke-Expression
 }
 #endregion
 
@@ -53,4 +53,10 @@ if (Get-Command oh-my-posh -ErrorAction SilentlyContinue) {
 # Set-MyCustomPath
 
 # Set-Alias g git # Example Git alias
+Set-Alias -Name firefox -Value "C:\Program Files\Mozilla Firefox\firefox.exe"
+
+Function YN {Start-Process "C:\Program Files\Mozilla Firefox\firefox.exe" -argumentlist "-url https://app.ynab.com" }
+Set-Alias -Name ynab -Value YN
+
+Set-Alias -Name steam -Value "C:\Program Files (x86)\Steam\steam.exe"
 #endregion
