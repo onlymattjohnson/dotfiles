@@ -171,43 +171,50 @@ if (Test-Path $powerShellProfileSource) {
 }
 #endregion
 
+#region Configure Git Global Settings
 Write-Host "🔧 Configuring Git Global Settings..." -ForegroundColor Green
 
-#region Configure Git Global Settings
 try {
-    # Check if user.name is already set globally
-    $currentGitUserName = git config --global user.name -ErrorAction SilentlyContinue
-    if ([string]::IsNullOrEmpty($currentGitUserName)) {
-        # If not set, prompt the user for their Git user name
-        Write-Host "📝 Git user name not configured." -ForegroundColor Yellow
-        $gitUserName = Read-Host -Prompt "Enter your Git user name (e.g., 'John Doe')"
-        if ($gitUserName) { # Only set if user provides a value
-            git config --global user.name "$gitUserName"
-            Write-Host "✅ Git global user.name set to '$gitUserName'." -ForegroundColor Green
-        } else {
-            Write-Host "⚠️  Git user name not provided. Skipping setting user.name." -ForegroundColor Yellow
-        }
+    # Check if git is available
+    if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+        Write-Host "⚠️  Git is not installed or not in PATH. Skipping Git configuration." -ForegroundColor Yellow
     } else {
-        Write-Host "✅ Git global user.name is already set to '$currentGitUserName'." -ForegroundColor Cyan
-    }
-
-    # Check if user.email is already set globally
-    $currentGitUserEmail = git config --global user.email -ErrorAction SilentlyContinue
-    if ([string]::IsNullOrEmpty($currentGitUserEmail)) {
-        # If not set, prompt the user for their Git user email
-        Write-Host "📝 Git user email not configured." -ForegroundColor Yellow
-        $gitUserEmail = Read-Host -Prompt "Enter your Git user email (e.g., 'your.email@example.com')"
-        if ($gitUserEmail) { # Only set if user provides a value
-            git config --global user.email "$gitUserEmail"
-            Write-Host "✅ Git global user.email set to '$gitUserEmail'." -ForegroundColor Green
+        # Check if user.name is already set globally
+        $currentGitUserName = & git config --global user.name 2>$null
+        
+        if ([string]::IsNullOrWhiteSpace($currentGitUserName)) {
+            # If not set, prompt the user for their Git user name
+            Write-Host "📝 Git user name not configured." -ForegroundColor Yellow
+            $gitUserName = Read-Host -Prompt "Enter your Git user name (e.g., 'John Doe')"
+            if (![string]::IsNullOrWhiteSpace($gitUserName)) {
+                & git config --global user.name "$gitUserName"
+                Write-Host "✅ Git global user.name set to '$gitUserName'." -ForegroundColor Green
+            } else {
+                Write-Host "⚠️  Git user name not provided. Skipping setting user.name." -ForegroundColor Yellow
+            }
         } else {
-            Write-Host "⚠️  Git user email not provided. Skipping setting user.email." -ForegroundColor Yellow
+            Write-Host "✅ Git global user.name is already set to '$currentGitUserName'." -ForegroundColor Cyan
         }
-    } else {
-        Write-Host "✅ Git global user.email is already set to '$currentGitUserEmail'." -ForegroundColor Cyan
-    }
 
-    Write-Host "✅ Git global settings configuration complete." -ForegroundColor Green
+        # Check if user.email is already set globally
+        $currentGitUserEmail = & git config --global user.email 2>$null
+        
+        if ([string]::IsNullOrWhiteSpace($currentGitUserEmail)) {
+            # If not set, prompt the user for their Git user email
+            Write-Host "📝 Git user email not configured." -ForegroundColor Yellow
+            $gitUserEmail = Read-Host -Prompt "Enter your Git user email (e.g., 'your.email@example.com')"
+            if (![string]::IsNullOrWhiteSpace($gitUserEmail)) {
+                & git config --global user.email "$gitUserEmail"
+                Write-Host "✅ Git global user.email set to '$gitUserEmail'." -ForegroundColor Green
+            } else {
+                Write-Host "⚠️  Git user email not provided. Skipping setting user.email." -ForegroundColor Yellow
+            }
+        } else {
+            Write-Host "✅ Git global user.email is already set to '$currentGitUserEmail'." -ForegroundColor Cyan
+        }
+
+        Write-Host "✅ Git global settings configuration complete." -ForegroundColor Green
+    }
 }
 catch {
     Write-Host "❌ Failed to configure Git global settings: $($_.Exception.Message)" -ForegroundColor Red
