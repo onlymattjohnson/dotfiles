@@ -81,6 +81,30 @@ if (Test-Path $packagesConfigPath) {
 }
 #endregion
 
+#region Install Windows Terminal separately
+Write-Host "🖥️ Checking Windows Terminal installation..." -ForegroundColor Cyan
+
+# Check if Windows Terminal is already installed
+if (Get-Command wt -ErrorAction SilentlyContinue) {
+    Write-Host "✅ Windows Terminal is already installed" -ForegroundColor Green
+} else {
+    Write-Host "📦 Installing Windows Terminal via winget..." -ForegroundColor Yellow
+    try {
+        # Check if winget is available
+        if (Get-Command winget -ErrorAction SilentlyContinue) {
+            winget install --id Microsoft.WindowsTerminal -e --accept-source-agreements --accept-package-agreements
+            Write-Host "✅ Windows Terminal installed successfully via winget!" -ForegroundColor Green
+        } else {
+            Write-Host "⚠️  Winget not found. Please install Windows Terminal manually from the Microsoft Store." -ForegroundColor Yellow
+        }
+    }
+    catch {
+        Write-Host "❌ Could not install Windows Terminal automatically." -ForegroundColor Red
+        Write-Host "   Please install it manually from the Microsoft Store." -ForegroundColor Gray
+    }
+}
+#endregion
+
 #region Refresh environment variables
 Write-Host "🔄 Refreshing environment variables..." -ForegroundColor Cyan
 try {
