@@ -1,0 +1,11 @@
+# Espanso sensitive files
+espanso/match/secrets.yml
+espanso/match/personal.yml
+espanso/match/*-private.yml
+espanso/match/*-sensitive.yml
+
+# Just in case someone names them differently
+espanso/match/*password*
+espanso/match/*secret*
+espanso/match/*private*
+espanso/match/*personal*
