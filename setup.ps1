@@ -57,6 +57,18 @@ if (-not (Get-Command choco.exe -ErrorAction SilentlyContinue)) {
 }
 #endregion
 
+#region Enable Chocolatey Global Confirmation for Automation
+Write-Host "🔧 Configuring Chocolatey for automation..." -ForegroundColor Cyan
+try {
+    # Enable global confirmation to prevent prompts during automated upgrades
+    choco feature enable -n allowGlobalConfirmation -y | Out-Null
+    Write-Host "✅ Chocolatey global confirmation enabled for automated operations" -ForegroundColor Green
+}
+catch {
+    Write-Host "⚠️  Could not enable Chocolatey global confirmation: $($_.Exception.Message)" -ForegroundColor Yellow
+}
+#endregion
+
 Write-Host "--- Initial Setup Complete (Chocolatey is ready!) ---" -ForegroundColor Green
 
 Write-Host "🚀 Chocolatey is ready! Proceeding with package installation..." -ForegroundColor Green
@@ -70,7 +82,10 @@ if (Test-Path $packagesConfigPath) {
     try {
         # Use choco install with --yes to accept prompts and --config to specify the config file
         # Use --no-progress to suppress the progress bar for cleaner output in scripts
-        choco install $packagesConfigPath --yes --no-progress
+        choco install $packagesConfigPath --yes --no-progress --skip-if-not-installed 2>&1 | Where-Object {
+            $_ -notmatch "already installed" -and 
+            $_ -notmatch "Use --force to reinstall"
+        } | ForEach-Object { Write-Host $_ }
         Write-Host "✅ Chocolatey packages installation/upgrade complete!" -ForegroundColor Green
     }
     catch {
@@ -218,6 +233,30 @@ try {
 }
 catch {
     Write-Host "❌ Failed to configure Git global settings: $($_.Exception.Message)" -ForegroundColor Red
+}
+#endregion
+
+#region Setup Chocolatey Auto-Upgrade Scheduler
+Write-Host ""
+Write-Host "🤖 Setting up Chocolatey Auto-Upgrade Automation..." -ForegroundColor Green
+
+$chocoSchedulerPath = Join-Path $scriptDir "automation\Schedule-ChocoUpgrade.ps1"
+
+if (Test-Path $chocoSchedulerPath) {
+    Write-Host "📅 Configuring automatic Chocolatey upgrades..." -ForegroundColor Yellow
+    try {
+        # Execute the scheduler script
+        & $chocoSchedulerPath
+        Write-Host "✅ Chocolatey auto-upgrade scheduler configured successfully!" -ForegroundColor Green
+        Write-Host "   📋 Your packages will be automatically updated weekly on Saturdays at 3:00 AM" -ForegroundColor Cyan
+    }
+    catch {
+        Write-Host "⚠️  Failed to setup Chocolatey auto-upgrade scheduler: $($_.Exception.Message)" -ForegroundColor Yellow
+        Write-Host "   💡 You can run the scheduler manually later: .\automation\Schedule-ChocoUpgrade.ps1" -ForegroundColor Gray
+    }
+} else {
+    Write-Host "⚠️  Chocolatey scheduler script not found at '$chocoSchedulerPath'" -ForegroundColor Yellow
+    Write-Host "   💡 Make sure the automation\Schedule-ChocoUpgrade.ps1 file exists" -ForegroundColor Gray
 }
 #endregion
 
