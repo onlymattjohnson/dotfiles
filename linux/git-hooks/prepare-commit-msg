@@ -17,4 +17,4 @@ fi
 
 # Generate the commit message using Gemini and write it to the commit message file
 # Note: This assumes you have a 'gemini' CLI tool configured.
-gemini --prompt "$(cat "$PROMPT_FILE")" <<< "$DIFF" > "$COMMIT_MSG_FILE"
+gemini --model=gemini-2.5-flash --prompt "$(cat "$PROMPT_FILE")" <<< "$DIFF" > "$COMMIT_MSG_FILE"
