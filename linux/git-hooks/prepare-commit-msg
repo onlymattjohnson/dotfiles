@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# Path to the prompt file
+PROMPT_FILE="$HOME/.dotfiles/common/git-prompts/commit-prompt.txt"
+
+# Path to the file where the commit message will be stored
+COMMIT_MSG_FILE=$1
+
+# The git diff to be used as input for Gemini
+DIFF=$(git diff --cached)
+
+# Check if the diff is empty
+if [ -z "$DIFF" ]; then
+    echo "No changes to commit." >&2
+    exit 0
+fi
+
+# Generate the commit message using Gemini and write it to the commit message file
+# Note: This assumes you have a 'gemini' CLI tool configured.
+gemini --model=gemini-2.5-pro --prompt "$(cat "$PROMPT_FILE")" <<< "$DIFF" > "$COMMIT_MSG_FILE"
