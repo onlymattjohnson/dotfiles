@@ -10,7 +10,8 @@ Always produce a Conventional Commits–compliant message, with this structure:
 2. **Body** (optional, separated by a blank line)  
    - Explain **why** you made the change, not just **what** you changed  
    - Mention key **files** affected and a brief note on what was changed in each  
-   - Use bullet points if there are multiple points  
+   - Use bullet points if there are multiple points 
+   - Keep each line in the body to 72 characters or less 
 
 3. **Footer** (optional)  
    - Reference issues or breaking changes, e.g. `BREAKING CHANGE: …` or `Closes #123`
