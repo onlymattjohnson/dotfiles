@@ -260,6 +260,35 @@ if (Test-Path $chocoSchedulerPath) {
 }
 #endregion
 
+#region Setup Daily Webpage Automation
+Write-Host ""
+Write-Host "⚙️ Setting up Daily Webpage on Unlock..." -ForegroundColor Green
+
+$dailyTaskInstaller = Join-Path $scriptDir "automation\daily-webpage\install.ps1"
+$dailyTaskName      = "OpenDailyPageOnUnlock"
+
+if (Test-Path $dailyTaskInstaller) {
+    try {
+        $existingTask = Get-ScheduledTask -TaskName $dailyTaskName -ErrorAction SilentlyContinue
+        if ($existingTask) {
+            Write-Host "ℹ️ Task '$dailyTaskName' already exists; updating to ensure latest scripts..." -ForegroundColor Cyan
+        } else {
+            Write-Host "🗓️ Installing scheduled task '$dailyTaskName'..." -ForegroundColor Yellow
+        }
+
+        & $dailyTaskInstaller -TaskName $dailyTaskName
+        Write-Host "✅ Daily webpage task installed/updated successfully." -ForegroundColor Green
+        Write-Host "   📂 Scripts at C:\Scripts; 📝 Logs at %LOCALAPPDATA%\\DailyWebpage\\run.log" -ForegroundColor Gray
+    }
+    catch {
+        Write-Host "⚠️  Failed to setup daily webpage task: $($_.Exception.Message)" -ForegroundColor Yellow
+        Write-Host "   ➡️ You can run it manually later: .\\automation\\daily-webpage\\install.ps1" -ForegroundColor Gray
+    }
+} else {
+    Write-Host "⚠️  Daily webpage installer not found at '$dailyTaskInstaller'" -ForegroundColor Yellow
+}
+#endregion
+
 #region Check for package updates
 Write-Host "🔄 Checking for package updates..." -ForegroundColor Cyan
 try {
